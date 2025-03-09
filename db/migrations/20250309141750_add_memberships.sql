@@ -38,7 +38,14 @@ CREATE TABLE transactions (
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
+INSERT INTO membership_plans (id, name, price, billing_cycle, features, is_popular, max_folders, custom_domain, advanced_analytics, stripe_product_id)
+VALUES 
+    ('free', 'Free', 0, 'monthly', ARRAY['Basic photo uploads', 'Limited analytics'], false, 3, false, false, 'stripe_free_product_id'),
+    ('monthly-unlimited', 'Unlimited', 19.99, 'monthly', ARRAY['Unlimited photo groups', 'Advanced analytics', 'Custom domain'], true, NULL, true, true, 'stripe_monthly_product_id'),
+    ('yearly-unlimited', 'Unlimited', 199.99, 'yearly', ARRAY['Unlimited photo groups', 'Advanced analytics', 'Custom domain'], true, NULL, true, true, 'stripe_yearly_product_id');
+
 -- migrate:down
+DELETE FROM membership_plans WHERE id IN ('free', 'monthly-unlimited', 'yearly-unlimited');
 DROP TABLE IF EXISTS transactions;
 DROP TABLE IF EXISTS memberships;
 DROP TABLE IF EXISTS membership_plans;

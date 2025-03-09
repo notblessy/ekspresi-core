@@ -39,6 +39,7 @@ func (a *userRepository) Authenticate(ctx context.Context, code, requestOrigin s
 	}
 
 	var authUser model.User
+
 	err = a.db.Where("email = ?", auth.Email).First(&authUser).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		logger.Errorf("Error querying user: %v", err)
@@ -49,16 +50,30 @@ func (a *userRepository) Authenticate(ctx context.Context, code, requestOrigin s
 		authUser = model.User{
 			ID:      id,
 			Name:    auth.Name,
-			Role:    "USER",
+			Role:    model.RoleUser,
 			Email:   auth.Email,
 			Picture: auth.Picture,
 		}
 
-		err = a.db.Create(&authUser).Error
+		tx := a.db.Begin()
+
+		err = tx.Create(&authUser).Error
 		if err != nil {
 			logger.Errorf("Error creating user: %v", err)
+			tx.Rollback()
 			return model.User{}, err
 		}
+
+		membership := authUser.NewFreeMembership()
+
+		err = tx.Create(&membership).Error
+		if err != nil {
+			logger.Errorf("Error creating membership: %v", err)
+			tx.Rollback()
+			return model.User{}, err
+		}
+
+		tx.Commit()
 	}
 
 	return authUser, nil

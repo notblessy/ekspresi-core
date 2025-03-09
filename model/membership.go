@@ -9,6 +9,14 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+const (
+	MembershipStatusActive   = "active"
+	MembershipStatusInactive = "inactive"
+
+	BillingCycleMonthly = "monthly"
+	BillingCycleYearly  = "yearly"
+)
+
 type MembershipRepository interface {
 	FindAll(ctx context.Context, query MembershipQueryInput) ([]Membership, int64, error)
 	FindByID(ctx context.Context, id string) (Membership, error)

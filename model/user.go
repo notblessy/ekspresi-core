@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"os"
 	"time"
 
 	"gorm.io/gorm"
@@ -31,6 +32,20 @@ type User struct {
 
 func (u *User) OmitPassword() {
 	u.Password = ""
+}
+
+func (u *User) NewFreeMembership() Membership {
+	trial := os.Getenv("MEMBERSHIP_PLAN_FREE")
+
+	return Membership{
+		UserID:                     u.ID,
+		MembershipPlanID:           trial,
+		Status:                     MembershipStatusActive,
+		StartDate:                  time.Now(),
+		StripeSubscriptionID:       trial,
+		StripeSubscriptionInterval: trial,
+		CreatedAt:                  time.Now(),
+	}
 }
 
 type Auth struct {

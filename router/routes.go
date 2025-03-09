@@ -7,8 +7,10 @@ import (
 )
 
 type httpService struct {
-	db       *gorm.DB
-	userRepo model.UserRepository
+	db                 *gorm.DB
+	userRepo           model.UserRepository
+	membershipPlanRepo model.MembershipPlanRepository
+	membershipRepo     model.MembershipRepository
 }
 
 func NewHTTPService() *httpService {
@@ -23,6 +25,14 @@ func (h *httpService) RegisterUserRepository(repo model.UserRepository) {
 	h.userRepo = repo
 }
 
+func (h *httpService) RegisterMembershipPlanRepository(repo model.MembershipPlanRepository) {
+	h.membershipPlanRepo = repo
+}
+
+func (h *httpService) RegisterMembershipRepository(repo model.MembershipRepository) {
+	h.membershipRepo = repo
+}
+
 func (h *httpService) Router(e *echo.Echo) {
 	e.GET("/ping", h.ping)
 	e.GET("/health", h.health)
@@ -35,6 +45,14 @@ func (h *httpService) Router(e *echo.Echo) {
 	v1.Use(NewJWTMiddleware().ValidateJWT)
 	users := v1.Group("/users")
 	users.GET("/me", h.profileHandler)
+
+	membershipPlans := v1.Group("/membership-plans")
+	membershipPlans.POST("", h.createMembershipPlan)
+	membershipPlans.GET("", h.findAllMembershipPlans)
+	membershipPlans.GET("/:id", h.findMembershipPlanByID)
+	membershipPlans.PUT("/:id", h.updateMembershipPlan)
+	membershipPlans.DELETE("/:id", h.deleteMembershipPlan)
+
 }
 
 func (h *httpService) ping(c echo.Context) error {

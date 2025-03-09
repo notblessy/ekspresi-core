@@ -7,6 +7,11 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	RoleAdmin = "admin"
+	RoleUser  = "user"
+)
+
 type UserRepository interface {
 	Authenticate(ctx context.Context, code, requestOrigin string) (User, error)
 	FindByID(ctx context.Context, id string) (User, error)

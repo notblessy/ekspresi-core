@@ -73,6 +73,33 @@ func (a *userRepository) Authenticate(ctx context.Context, code, requestOrigin s
 			return model.User{}, err
 		}
 
+		defaultPortfolio := authUser.NewInitialPortfolio()
+
+		err = tx.Create(defaultPortfolio).Error
+		if err != nil {
+			logger.Errorf("Error creating portfolio: %v", err)
+			tx.Rollback()
+			return model.User{}, err
+		}
+
+		defaultProfile := authUser.NewDefaultProfile(defaultPortfolio.ID)
+
+		err = tx.Create(&defaultProfile).Error
+		if err != nil {
+			logger.Errorf("Error creating profile: %v", err)
+			tx.Rollback()
+			return model.User{}, err
+		}
+
+		defaultFolders := model.NewInitialFolder(defaultPortfolio.ID)
+
+		err = tx.Create(&defaultFolders).Error
+		if err != nil {
+			logger.Errorf("Error creating folders: %v", err)
+			tx.Rollback()
+			return model.User{}, err
+		}
+
 		tx.Commit()
 	}
 

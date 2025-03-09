@@ -12,7 +12,7 @@ CREATE TABLE portfolios (
 );
 
 CREATE TABLE profiles (
-    id SERIAL PRIMARY KEY,
+    id VARCHAR(255) PRIMARY KEY,
     portfolio_id VARCHAR(255) REFERENCES portfolios(id) ON DELETE CASCADE,
     name VARCHAR(150) NOT NULL,
     title VARCHAR(150),

@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/oklog/ulid/v2"
 	"gorm.io/gorm"
 )
 
@@ -45,6 +46,26 @@ func (u *User) NewFreeMembership() Membership {
 		StripeSubscriptionID:       trial,
 		StripeSubscriptionInterval: trial,
 		CreatedAt:                  time.Now(),
+	}
+}
+
+func (u *User) NewInitialPortfolio() *Portfolio {
+	return &Portfolio{
+		ID:             ulid.Make().String(),
+		UserID:         u.ID,
+		Title:          u.Name,
+		Columns:        3,
+		Gap:            16,
+		RoundedCorners: true,
+		ShowCaptions:   true,
+	}
+}
+
+func (u *User) NewDefaultProfile(portfolioID string) Profile {
+	return Profile{
+		PortfolioID: portfolioID,
+		Name:        u.Name,
+		Title:       DefaultTitle,
 	}
 }
 

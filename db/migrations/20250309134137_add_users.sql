@@ -6,6 +6,7 @@ CREATE TABLE users (
     password VARCHAR(150),
     picture TEXT,
     role VARCHAR(32) NOT NULL DEFAULT 'USER',
+    stripe_customer_id VARCHAR(255),
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMPTZ,

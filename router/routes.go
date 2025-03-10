@@ -11,6 +11,7 @@ type httpService struct {
 	userRepo           model.UserRepository
 	membershipPlanRepo model.MembershipPlanRepository
 	membershipRepo     model.MembershipRepository
+	portfolioRepo      model.PortfolioRepository
 }
 
 func NewHTTPService() *httpService {
@@ -33,6 +34,10 @@ func (h *httpService) RegisterMembershipRepository(repo model.MembershipReposito
 	h.membershipRepo = repo
 }
 
+func (h *httpService) RegisterPortfolioRepository(repo model.PortfolioRepository) {
+	h.portfolioRepo = repo
+}
+
 func (h *httpService) Router(e *echo.Echo) {
 	e.GET("/ping", h.ping)
 	e.GET("/health", h.health)
@@ -53,6 +58,8 @@ func (h *httpService) Router(e *echo.Echo) {
 	membershipPlans.PUT("/:id", h.updateMembershipPlan)
 	membershipPlans.DELETE("/:id", h.deleteMembershipPlan)
 
+	portfolios := v1.Group("/portfolios")
+	portfolios.PATCH("", h.patchPortfolioHandler)
 }
 
 func (h *httpService) ping(c echo.Context) error {

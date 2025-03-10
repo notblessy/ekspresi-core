@@ -1,6 +1,7 @@
 package model
 
 import (
+	"context"
 	"time"
 
 	"github.com/oklog/ulid/v2"
@@ -9,6 +10,10 @@ import (
 const (
 	DefaultTitle = "Professional Photographer"
 )
+
+type PortfolioRepository interface {
+	Patch(ctx context.Context, p PortfolioType) error
+}
 
 type Portfolio struct {
 	ID             string    `json:"id"`
@@ -23,7 +28,7 @@ type Portfolio struct {
 }
 
 type Profile struct {
-	ID          int    `json:"id"`
+	ID          string `json:"id"`
 	PortfolioID string `json:"portfolio_id"`
 	Name        string `json:"name"`
 	Title       string `json:"title"`
@@ -83,4 +88,49 @@ type PortfolioType struct {
 	Portfolio
 	Profiles Profile      `json:"profiles"`
 	Folders  []FolderType `json:"folders"`
+}
+
+func (pt *PortfolioType) GetPortfolio() Portfolio {
+	return Portfolio{
+		ID:             pt.ID,
+		UserID:         pt.UserID,
+		Title:          pt.Title,
+		Columns:        pt.Columns,
+		Gap:            pt.Gap,
+		RoundedCorners: pt.RoundedCorners,
+		ShowCaptions:   pt.ShowCaptions,
+		CreatedAt:      pt.CreatedAt,
+		UpdatedAt:      pt.UpdatedAt,
+	}
+}
+
+func (pt *PortfolioType) GetProfiles() Profile {
+	return Profile{
+		ID:          pt.Profiles.ID,
+		PortfolioID: pt.Profiles.PortfolioID,
+		Name:        pt.Profiles.Name,
+		Title:       pt.Profiles.Title,
+		Bio:         pt.Profiles.Bio,
+		Email:       pt.Profiles.Email,
+		Instagram:   pt.Profiles.Instagram,
+		Website:     pt.Profiles.Website,
+	}
+}
+
+func (pt *PortfolioType) GetFolders() []Folder {
+	var folders []Folder
+
+	for _, f := range pt.Folders {
+		folders = append(folders, Folder{
+			ID:          f.ID,
+			PortfolioID: f.PortfolioID,
+			Name:        f.Name,
+			Description: f.Description,
+			CoverID:     f.CoverID,
+			CreatedAt:   f.CreatedAt,
+			UpdatedAt:   f.UpdatedAt,
+		})
+	}
+
+	return folders
 }

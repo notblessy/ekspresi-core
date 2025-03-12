@@ -3,6 +3,8 @@ CREATE TABLE portfolios (
     id VARCHAR(255) PRIMARY KEY,
     user_id VARCHAR(255) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     title VARCHAR(255) NOT NULL,
+    theme VARCHAR(255) NOT NULL DEFAULT 'light',
+    description TEXT,
     columns INT NOT NULL DEFAULT 3,
     gap INT NOT NULL DEFAULT 16,
     rounded_corners BOOLEAN NOT NULL DEFAULT true,
@@ -28,12 +30,16 @@ CREATE TABLE folders (
     name VARCHAR(255) NOT NULL,
     description TEXT,
     cover_id INT,
+    columns INT NOT NULL DEFAULT 3,
+    gap INT NOT NULL DEFAULT 16,
+    rounded_corners BOOLEAN NOT NULL DEFAULT true,
+    show_captions BOOLEAN NOT NULL DEFAULT true,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE photos (
-    id SERIAL PRIMARY KEY,
+    id VARCHAR(255) PRIMARY KEY,
     folder_id VARCHAR(255) REFERENCES folders(id) ON DELETE CASCADE,
     src TEXT NOT NULL,
     alt TEXT,

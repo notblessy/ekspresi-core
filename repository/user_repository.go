@@ -106,14 +106,19 @@ func (a *userRepository) Authenticate(ctx context.Context, code, requestOrigin s
 	return authUser, nil
 }
 
-func (a *userRepository) FindByID(ctx context.Context, id string) (model.User, error) {
+func (a *userRepository) FindByID(ctx context.Context, id string) (model.MeResponse, error) {
 	logger := logrus.WithField("id", id)
 
-	var user model.User
-	err := a.db.Where("id = ?", id).First(&user).Error
+	var user model.MeResponse
+	err := a.db.Where("id = ?", id).
+		Preload("Portfolio").
+		Preload("Portfolio.Profiles").
+		Preload("Portfolio.Folders").
+		Preload("Portfolio.Folders.Photos").
+		First(&user).Error
 	if err != nil {
 		logger.Errorf("Error querying user: %v", err)
-		return model.User{}, err
+		return model.MeResponse{}, err
 	}
 
 	user.OmitPassword()

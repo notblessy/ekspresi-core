@@ -16,7 +16,7 @@ const (
 
 type UserRepository interface {
 	Authenticate(ctx context.Context, code, requestOrigin string) (User, error)
-	FindByID(ctx context.Context, id string) (User, error)
+	FindByID(ctx context.Context, id string) (MeResponse, error)
 }
 
 type User struct {
@@ -53,7 +53,9 @@ func (u *User) NewInitialPortfolio() *Portfolio {
 	return &Portfolio{
 		ID:             ulid.Make().String(),
 		UserID:         u.ID,
-		Title:          u.Name,
+		Title:          "My Photography Portfolio",
+		Description:    "A showcase of my photography work and projects.",
+		Theme:          "light",
 		Columns:        3,
 		Gap:            16,
 		RoundedCorners: true,
@@ -63,6 +65,7 @@ func (u *User) NewInitialPortfolio() *Portfolio {
 
 func (u *User) NewDefaultProfile(portfolioID string) Profile {
 	return Profile{
+		ID:          ulid.Make().String(),
 		PortfolioID: portfolioID,
 		Name:        u.Name,
 		Title:       DefaultTitle,
@@ -87,4 +90,13 @@ type GoogleAuthInfo struct {
 	Email   string `json:"email"`
 	Name    string `json:"name"`
 	Picture string `json:"picture"`
+}
+
+type MeResponse struct {
+	User
+	Portfolio PortfolioType `json:"portfolio" gorm:"foreignKey:UserID;references:ID"`
+}
+
+func (m MeResponse) TableName() string {
+	return "users"
 }

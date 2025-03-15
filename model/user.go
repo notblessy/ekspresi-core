@@ -94,7 +94,8 @@ type GoogleAuthInfo struct {
 
 type MeResponse struct {
 	User
-	Portfolio PortfolioType `json:"portfolio" gorm:"foreignKey:UserID;references:ID"`
+	Membership Membership    `json:"membership" gorm:"foreignKey:UserID;references:ID"`
+	Portfolio  PortfolioType `json:"portfolio" gorm:"foreignKey:UserID;references:ID"`
 }
 
 func (m MeResponse) TableName() string {

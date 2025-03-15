@@ -94,11 +94,14 @@ func NewInitialFolder(portfolioID string) []Folder {
 }
 
 type Photo struct {
-	ID       string `json:"id"`
-	FolderID string `json:"folder_id"`
-	Src      string `json:"src"`
-	Alt      string `json:"alt"`
-	Caption  string `json:"caption"`
+	ID        string    `json:"id"`
+	FolderID  string    `json:"folder_id"`
+	Src       string    `json:"src"`
+	Alt       string    `json:"alt"`
+	Caption   string    `json:"caption"`
+	PublicID  string    `json:"public_id"`
+	SortIndex int       `json:"sort_index"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 func (p *Photo) TableName() string {

@@ -43,7 +43,10 @@ CREATE TABLE photos (
     folder_id VARCHAR(255) REFERENCES folders(id) ON DELETE CASCADE,
     src TEXT NOT NULL,
     alt TEXT,
-    caption TEXT
+    caption TEXT,
+    public_id VARCHAR(255),
+    sort_index INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 -- migrate:down

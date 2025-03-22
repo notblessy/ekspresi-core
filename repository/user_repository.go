@@ -110,7 +110,9 @@ func (a *userRepository) FindByID(ctx context.Context, id string) (model.MeRespo
 	logger := logrus.WithField("id", id)
 
 	var user model.MeResponse
+
 	err := a.db.Where("id = ?", id).
+		Table("users").
 		Preload("Portfolio").
 		Preload("Portfolio.Profiles").
 		Preload("Portfolio.Folders").

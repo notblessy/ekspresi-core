@@ -56,6 +56,7 @@ type Folder struct {
 	RoundedCorners bool      `json:"rounded_corners"`
 	CreatedAt      time.Time `json:"created_at"`
 	UpdatedAt      time.Time `json:"updated_at"`
+	Photos         []Photo   `json:"photos" gorm:"foreignKey:FolderID;references:ID"`
 }
 
 func NewInitialFolder(portfolioID string) []Folder {
@@ -94,13 +95,13 @@ func NewInitialFolder(portfolioID string) []Folder {
 }
 
 type Photo struct {
-	ID        string    `json:"id"`
-	FolderID  string    `json:"folder_id"`
+	ID        string    `json:"id" form:"id"`
+	FolderID  string    `json:"folder_id" form:"folder_id"`
 	Src       string    `json:"src"`
-	Alt       string    `json:"alt"`
-	Caption   string    `json:"caption"`
+	Alt       string    `json:"alt" form:"alt"`
+	Caption   string    `json:"caption" form:"caption"`
 	PublicID  string    `json:"public_id"`
-	SortIndex int       `json:"sort_index"`
+	SortIndex int       `json:"sort_index" form:"sort_index"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
@@ -117,10 +118,22 @@ func (ft FolderType) TableName() string {
 	return "folders"
 }
 
+func (f *FolderType) GetPhotoPublicIDs() []string {
+	var publicIds []string
+
+	for _, p := range f.Photos {
+		publicIds = append(publicIds, p.PublicID)
+	}
+
+	return publicIds
+}
+
 type PortfolioType struct {
 	Portfolio
-	Profiles Profile      `json:"profiles" gorm:"foreignKey:PortfolioID;references:ID"`
-	Folders  []FolderType `json:"folders" gorm:"foreignKey:PortfolioID;references:ID"`
+	Profiles       Profile      `json:"profiles" gorm:"foreignKey:PortfolioID;references:ID"`
+	Folders        []FolderType `json:"folders" gorm:"foreignKey:PortfolioID;references:ID"`
+	DeletedFolders []string     `json:"deleted_folders" gorm:"-"`
+	DeletedPhotos  []string     `json:"deleted_photos" gorm:"-"`
 }
 
 func (p *PortfolioType) TableName() string {
@@ -154,18 +167,13 @@ func (pt *PortfolioType) GetProfiles() Profile {
 	}
 }
 
-func (pt *PortfolioType) GetFolders() []Folder {
-	var folders []Folder
+func (pt *PortfolioType) GetFolders() []FolderType {
+	var folders []FolderType
 
 	for _, f := range pt.Folders {
-		folders = append(folders, Folder{
-			ID:          f.ID,
-			PortfolioID: f.PortfolioID,
-			Name:        f.Name,
-			Description: f.Description,
-			CoverID:     f.CoverID,
-			CreatedAt:   f.CreatedAt,
-			UpdatedAt:   f.UpdatedAt,
+		folders = append(folders, FolderType{
+			Folder: f.Folder,
+			Photos: f.Photos,
 		})
 	}
 

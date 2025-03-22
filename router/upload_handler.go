@@ -2,13 +2,12 @@ package router
 
 import (
 	"fmt"
-	"io"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/notblessy/ekspresi-core/model"
-	"github.com/notblessy/ekspresi-core/utils"
 	"github.com/sirupsen/logrus"
 )
 
@@ -21,24 +20,19 @@ func (h *httpService) uploadPhotoHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, response{Message: err.Error()})
 	}
 
+	var photo model.Photo
+
+	if err := c.Bind(&photo); err != nil {
+		logger.WithError(err).Error("failed to bind request")
+		return c.JSON(http.StatusBadRequest, response{Message: err.Error()})
+	}
+
 	src, err := file.Open()
 	if err != nil {
 		logger.WithError(err).Error("failed to open file")
 		return c.JSON(http.StatusInternalServerError, response{Message: err.Error()})
 	}
 	defer src.Close()
-
-	buffer, err := io.ReadAll(src)
-	if err != nil {
-		logger.WithError(err).Error("failed to read file")
-		return c.JSON(http.StatusInternalServerError, response{Message: err.Error()})
-	}
-
-	compressedFile, err := utils.CompressImage(buffer, 70)
-	if err != nil {
-		logger.WithError(err).Error("failed to compress image")
-		return c.JSON(http.StatusInternalServerError, response{Message: err.Error()})
-	}
 
 	session, err := authSession(c)
 	if err != nil {
@@ -48,18 +42,31 @@ func (h *httpService) uploadPhotoHandler(c echo.Context) error {
 
 	path := fmt.Sprintf("%s/%s/%s", os.Getenv("UPLOADER_BASE_PATH"), "portfolios", session.ID)
 
-	url, publicID, err := h.uploaderRepo.Upload(c.Request().Context(), compressedFile, path)
+	url, publicID, err := h.uploaderRepo.Upload(c.Request().Context(), src, path)
 	if err != nil {
 		logger.WithError(err).Error("failed to upload file")
 		return c.JSON(http.StatusInternalServerError, response{Message: err.Error()})
 	}
 
+	newPhoto := model.Photo{
+		ID:        photo.ID,
+		Src:       url,
+		PublicID:  publicID,
+		Alt:       photo.Alt,
+		Caption:   photo.Caption,
+		SortIndex: photo.SortIndex,
+		CreatedAt: time.Now(),
+	}
+
+	err = h.uploaderRepo.SavePhoto(c.Request().Context(), newPhoto)
+	if err != nil {
+		logger.WithError(err).Error("failed to save photo")
+		return c.JSON(http.StatusInternalServerError, response{Message: err.Error()})
+	}
+
 	return c.JSON(http.StatusOK, response{
 		Success: true,
-		Data: map[string]interface{}{
-			"url":       url,
-			"public_id": publicID,
-		},
+		Data:    newPhoto,
 	})
 }
 

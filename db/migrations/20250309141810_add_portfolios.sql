@@ -40,7 +40,7 @@ CREATE TABLE folders (
 
 CREATE TABLE photos (
     id VARCHAR(255) PRIMARY KEY,
-    folder_id VARCHAR(255) REFERENCES folders(id) ON DELETE CASCADE,
+    folder_id VARCHAR(255),
     src TEXT NOT NULL,
     alt TEXT,
     caption TEXT,

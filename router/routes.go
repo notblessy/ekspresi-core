@@ -66,7 +66,7 @@ func (h *httpService) Router(e *echo.Echo) {
 	portfolios := v1.Group("/portfolios")
 	portfolios.PATCH("", h.patchPortfolioHandler)
 
-	upload := v1.Group("/upload")
+	upload := v1.Group("/uploads")
 	upload.POST("", h.uploadPhotoHandler)
 	upload.DELETE("", h.bulkRemovePhotosHandler)
 	upload.POST("/flush", h.flushHandler)
